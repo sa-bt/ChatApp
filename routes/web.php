@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -15,15 +16,29 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/', function () {
+Route::get('/', function ()
+{
     return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
+        'canLogin'       => Route::has('login'),
+        'canRegister'    => Route::has('register'),
         'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
+        'phpVersion'     => PHP_VERSION,
     ]);
 });
 
-Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
+Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function ()
+{
     return Inertia::render('Dashboard');
 })->name('dashboard');
+Route::middleware(['auth:sanctum', 'verified'])->get('/chat', function ()
+{
+    return Inertia::render('Chat/container');
+})->name('chat');
+
+Route::middleware(['auth:sanctum'])->prefix('chat')->group(function ()
+{
+    Route::get('/rooms', [ChatController::class, 'rooms']);
+    Route::get('/room/{room}/messages', [ChatController::class, 'messages']);
+    Route::post('/room/{room}/message', [ChatController::class, 'newMessage']);
+});
+
