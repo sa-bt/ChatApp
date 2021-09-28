@@ -1,5 +1,5 @@
 <template>
-    <div class="h-full p-2 flex flex-col-reverse overflow-scroll">
+    <div >
         {{message.user.name}}: {{message.message}}
     </div>
 </template>
