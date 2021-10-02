@@ -3,10 +3,10 @@
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 <chat-room-selection
-                v-if="currentRoom.id"
-                :rooms="chatRooms"
-                :currentRoom="currentRoom"
-                v-on:roomchanged="setRoom($event)"
+                    v-if="currentRoom.id"
+                    :rooms="chatRooms"
+                    :currentRoom="currentRoom"
+                    v-on:roomchanged="setRoom($event)"
                 />
             </h2>
         </template>
@@ -43,7 +43,27 @@
                 messages: []
             }
         },
+        watch: {
+            currentRoom(val, oldVal) {
+                if (oldVal.id) {
+                    this.disconnect(oldVal)
+                }
+                this.connect();
+            }
+        },
         methods: {
+            connect() {
+                if (this.currentRoom.id) {
+                    let vm = this;
+                    this.getMessages();
+                    window.Echo.private("chat." + this.currentRoom.id).listen('.message.new', e => {
+                        vm.getMessages()
+                    })
+                }
+            },
+            disconnect(room) {
+                window.Echo.leave("chat." + room.id)
+            },
             getRooms() {
                 axios.get('chat/rooms').then(response => {
                     this.chatRooms = response.data;
@@ -54,7 +74,6 @@
             },
             setRoom(room) {
                 this.currentRoom = room;
-                this.getMessages();
             },
             getMessages() {
                 axios.get('chat/room/' + this.currentRoom.id + '/messages')
